@@ -7,7 +7,7 @@ Ai Plant App is an application that helps you to identified the disease in the l
 Clone project ini
 
 ```bash
-https://github.com/Mr-Roma/Motionhack10.git
+https://github.com/Mr-Roma/AI-Plant-App.git
 ```
 
 Mendapatkan dependency
@@ -26,8 +26,14 @@ flutter run
 Akun demo
 
 ```bash
-Email : icha@gmail.com
-Password : icha123
+Email : -
+Password : -
+```
+
+Akun demo
+```bash
+The Dataset that we use : 
+https://www.kaggle.com/datasets/emmarex/plantdisease?resource=download
 ```
 
 ## Screenshots
