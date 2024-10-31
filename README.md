@@ -30,7 +30,8 @@ Email : -
 Password : -
 ```
 
-Akun demo
+The Dataset
+
 ```bash
 The Dataset that we use : 
 https://www.kaggle.com/datasets/emmarex/plantdisease?resource=download
