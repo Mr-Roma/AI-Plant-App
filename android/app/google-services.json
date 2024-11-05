@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "985277453339",
+    "project_id": "ai-plant-app",
+    "storage_bucket": "ai-plant-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:985277453339:android:f172fd2bb507885bbf54be",
+        "android_client_info": {
+          "package_name": "com.example.ai_plant_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXhC5qxVggDk27piZU4ppVoEGdJqxHnMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
