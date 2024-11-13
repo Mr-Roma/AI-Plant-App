@@ -1,3 +1,5 @@
+import 'package:ai_plant_app/pages/detail_page/article_detail.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -144,7 +146,8 @@ class _HomePageState extends State<HomePage> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
+                          return Center(
+                              child: const CircularProgressIndicator());
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else if (snapshot.hasData) {
@@ -153,10 +156,21 @@ class _HomePageState extends State<HomePage> {
                             children: articleData.map((article) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),
-                                child: _buildArticleCard(
-                                  article['title'],
-                                  article['description'],
-                                  article['imageUrl'],
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ArticleDetailPage(
+                                                  article: article,
+                                                )));
+                                  },
+                                  child: _buildArticleCard(
+                                    article['title'],
+                                    article['description'],
+                                    article['imageUrl'],
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -265,16 +279,15 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imagePath,
-                  loadingBuilder: (context, child, loadingProgress) =>
-                      (loadingProgress == null)
-                          ? child
-                          : CircularProgressIndicator(),
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.error),
-                )),
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: imagePath,
+                fit: BoxFit.cover,
+                placeholder: (context, url) =>
+                    const CircularProgressIndicator(),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
