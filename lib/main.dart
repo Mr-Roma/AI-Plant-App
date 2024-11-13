@@ -2,6 +2,7 @@ import 'package:ai_plant_app/onboarding_screen.dart';
 import 'package:ai_plant_app/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 
 void main() async {
