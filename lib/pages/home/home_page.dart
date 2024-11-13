@@ -151,9 +151,6 @@ class _HomePageState extends State<HomePage> {
                           List<dynamic> articleData = snapshot.data!;
                           return Column(
                             children: articleData.map((article) {
-                              String imageUrl = article['imageUrl'] ?? '';
-                              print('Image URL: $imageUrl'); // Debugging URL
-
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),
                                 child: _buildArticleCard(
@@ -268,9 +265,16 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(imagePath, fit: BoxFit.cover),
-            ),
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imagePath,
+                  loadingBuilder: (context, child, loadingProgress) =>
+                      (loadingProgress == null)
+                          ? child
+                          : CircularProgressIndicator(),
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.error),
+                )),
           ),
           const SizedBox(width: 12),
           Expanded(
