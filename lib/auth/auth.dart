@@ -1,5 +1,5 @@
 import 'package:ai_plant_app/login/login_or_register.dart';
-import 'package:ai_plant_app/pages/menu/bottom_navbar_menu.dart';
+import 'package:ai_plant_app/presentation/pages/menu/bottom_navbar_menu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

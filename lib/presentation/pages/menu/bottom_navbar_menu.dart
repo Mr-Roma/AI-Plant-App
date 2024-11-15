@@ -1,6 +1,6 @@
-import 'package:ai_plant_app/pages/home/home_page.dart';
-import 'package:ai_plant_app/pages/profile/profile_page.dart';
-import 'package:ai_plant_app/pages/saved/saved_page.dart';
+import 'package:ai_plant_app/presentation/pages/home/home_page.dart';
+import 'package:ai_plant_app/presentation/pages/profile/profile_page.dart';
+import 'package:ai_plant_app/presentation/pages/saved/saved_page.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavbar extends StatefulWidget {

@@ -1,8 +1,16 @@
-import 'package:ai_plant_app/pages/detail_page/article_detail.dart';
+import 'dart:io';
+
+import 'package:ai_plant_app/data/repositories/plant_repository.dart';
+import 'package:ai_plant_app/domain/usecases/image_picker.dart';
+import 'package:ai_plant_app/domain/usecases/scan_provider.dart';
+import 'package:ai_plant_app/presentation/pages/detail_page/article_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -12,11 +20,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late ImagePickerService _imagePickerService;
+  late PlantRepository _plantRepository;
   late Future<List<dynamic>> articles;
 
   @override
   void initState() {
     super.initState();
+    _imagePickerService = ImagePickerService();
+    _plantRepository = PlantRepository();
     articles = fetchArticles(); // Fetch the articles when the page loads
   }
 
@@ -28,6 +40,33 @@ class _HomePageState extends State<HomePage> {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to load articles');
+    }
+  }
+
+  Future<void> _handleImageSelection(ImageSource source) async {
+    final scanProvider = Provider.of<ScanProvider>(context, listen: false);
+
+    try {
+      final XFile? image = await _imagePickerService.pickImage(source);
+
+      if (image != null) {
+        scanProvider.setImage(File(image.path));
+        scanProvider.setLoading(true);
+
+        final result = await _plantRepository.identifyPlant(File(image.path));
+
+        if (result['success']) {
+          scanProvider.setScanResult(result['data']);
+          // Navigate to result page
+          Navigator.pushNamed(context, '/scan-result');
+        } else {
+          scanProvider.setError(result['error']);
+        }
+      }
+    } catch (e) {
+      scanProvider.setError('Failed to process image');
+    } finally {
+      scanProvider.setLoading(false);
     }
   }
 
@@ -68,12 +107,14 @@ class _HomePageState extends State<HomePage> {
                       icon: Icons.camera_alt,
                       color: Colors.green.shade700,
                       text: 'Scan and identify the plant',
+                      onTap: () => _handleImageSelection(ImageSource.camera),
                     ),
                     const SizedBox(height: 12),
                     _buildScanOption(
                       icon: Icons.image,
                       color: Colors.green.shade700,
                       text: 'Browse the image file',
+                      onTap: () => _handleImageSelection(ImageSource.gallery),
                     ),
 
                     // Categories Section
@@ -146,8 +187,8 @@ class _HomePageState extends State<HomePage> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(
-                              child: const CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else if (snapshot.hasData) {
@@ -191,25 +232,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildScanOption(
-      {required IconData icon, required Color color, required String text}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w500,
+      {required IconData icon,
+      required Color color,
+      required String text,
+      required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.green.shade50,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 12),
+            Text(
+              text,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
