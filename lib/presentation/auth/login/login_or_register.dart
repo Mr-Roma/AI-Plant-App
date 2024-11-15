@@ -1,5 +1,5 @@
-import 'package:ai_plant_app/login/login_page.dart';
-import 'package:ai_plant_app/login/register_page.dart';
+import 'package:ai_plant_app/presentation/auth/login/login_page.dart';
+import 'package:ai_plant_app/presentation/auth/login/register_page.dart';
 import 'package:flutter/material.dart';
 
 class LoginOrRegister extends StatefulWidget {
