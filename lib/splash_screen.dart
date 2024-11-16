@@ -12,7 +12,7 @@ class SplashScreen extends StatelessWidget {
             width: 414,
             height: MediaQuery.of(context).size.height,
             clipBehavior: Clip.antiAlias,
-            decoration: ShapeDecoration(
+            decoration: const ShapeDecoration(
               color: Colors.white,
               shape: RoundedRectangleBorder(),
               shadows: [
@@ -40,7 +40,7 @@ class SplashScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned(
+                const Positioned(
                   left: 127,
                   top: 495,
                   child: Text.rich(

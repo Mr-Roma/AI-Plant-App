@@ -13,8 +13,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.2.1
+  flutter_tflite: ^1.0.1
   http: ^1.2.2
-  image_picker: ^1.1.2
+  image_picker: ^0.8.9
   path_provider: ^2.1.5
   provider: ^6.1.2
 
@@ -29,3 +30,6 @@ flutter:
     - assets/
     - assets/images/
     - .env
+    - assets/models/model.tflite
+    - assets/models/labels.txt
+
