@@ -4,6 +4,7 @@ import 'package:ai_plant_app/presentation/widgets/homepage/buildArticleCard_widg
 import 'package:ai_plant_app/presentation/widgets/homepage/buildCategory_widget.dart';
 import 'package:ai_plant_app/presentation/widgets/homepage/buildScan_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_tflite/flutter_tflite.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -85,9 +86,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> fetchDescription(String title) async {
-    const String apiUrl =
-        'https://api-inference.huggingface.co/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5';
-    const String apiKey = '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';
+    String apiUrl = dotenv.env['API_URL']!;
+    String apiKey = dotenv.env['STORAGE_BUCKET']!;
 
     try {
       print('Fetching description for disease: $title'); // Debug print
