@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:ai_plant_app/presentation/pages/detail_page/article_detail.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ai_plant_app/presentation/widgets/homepage/buildArticleCard_widget.dart';
+import 'package:ai_plant_app/presentation/widgets/homepage/buildCategory_widget.dart';
+import 'package:ai_plant_app/presentation/widgets/homepage/buildScan_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tflite/flutter_tflite.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   String label = "";
   double confidence = 0.0;
   bool showScanResult = false;
+  String description = "";
 
   @override
   void initState() {
@@ -58,15 +61,86 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       filePath = imageFile;
+      description = "Loading description..."; // Set loading state
       if (recognition != null && recognition.isNotEmpty) {
         confidence = (recognition[0]['confidence'] * 100);
         label = (recognition[0]['label'].toString());
+        showScanResult = true;
       } else {
         label = "No result";
         confidence = 0.0;
+        showScanResult = true;
       }
-      showScanResult = true;
     });
+
+    print('Recognized label: $label'); // Debug print
+
+    if (label != "No result") {
+      await fetchDescription(label);
+    } else {
+      setState(() {
+        description = "Could not identify the disease.";
+      });
+    }
+  }
+
+  Future<void> fetchDescription(String title) async {
+    const String apiUrl =
+        'https://api-inference.huggingface.co/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5';
+    const String apiKey = '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';
+
+    try {
+      print('Fetching description for disease: $title'); // Debug print
+
+      final response = await http
+          .post(
+            Uri.parse(apiUrl),
+            headers: {
+              'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode({
+              'inputs':
+                  'Describe the plant disease: $title. Include symptoms, causes, and basic treatment recommendations.',
+              'parameters': {
+                'max_length': 500,
+                'temperature': 0.7,
+              }
+            }),
+          )
+          .timeout(
+              const Duration(seconds: 15)); // Set a timeout for the request
+
+      print('Response status code: ${response.statusCode}'); // Debug print
+      print('Response body: ${response.body}'); // Debug print
+
+      if (response.statusCode == 200) {
+        // Parse the response
+        final List<dynamic> responseData = json.decode(response.body);
+        if (responseData.isNotEmpty &&
+            responseData[0]['generated_text'] != null) {
+          setState(() {
+            description = responseData[0]['generated_text'];
+          });
+        } else {
+          setState(() {
+            description = 'No description available.';
+          });
+        }
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        setState(() {
+          description =
+              "Failed to fetch disease description. Please try again later.";
+        });
+      }
+    } catch (e) {
+      print('Error fetching description: $e');
+      setState(() {
+        description =
+            "An error occurred while fetching the disease description.";
+      });
+    }
   }
 
   Future<void> pickImageGallery() async {
@@ -160,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                       delegate: SliverChildListDelegate(
                         [
                           const SizedBox(height: 20),
-                          _buildScanOption(
+                          buildScanOption(
                               icon: Icons.camera_alt,
                               color: Colors.green.shade700,
                               text: 'Scan and identify the plant',
@@ -168,7 +242,7 @@ class _HomePageState extends State<HomePage> {
                                 pickImageCamera();
                               }),
                           const SizedBox(height: 12),
-                          _buildScanOption(
+                          buildScanOption(
                               icon: Icons.image,
                               color: Colors.green.shade700,
                               text: 'Browse the image file',
@@ -205,13 +279,13 @@ class _HomePageState extends State<HomePage> {
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
                             children: [
-                              _buildCategoryCard('Apple', '2 Plants',
+                              buildCategoryCard('Apple', '2 Plants',
                                   'assets/images/apple_home.png'),
-                              _buildCategoryCard('Grape', '1 Plant',
+                              buildCategoryCard('Grape', '1 Plant',
                                   'assets/images/grape_home.png'),
-                              _buildCategoryCard('Corn', '2 Plants',
+                              buildCategoryCard('Corn', '2 Plants',
                                   'assets/images/corn_home.png'),
-                              _buildCategoryCard('Orange', '5 Plants',
+                              buildCategoryCard('Orange', '5 Plants',
                                   'assets/images/orange_home.png'),
                             ],
                           ),
@@ -265,7 +339,7 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           );
                                         },
-                                        child: _buildArticleCard(
+                                        child: buildArticleCard(
                                           article['title'],
                                           article['description'],
                                           article['imageUrl'],
@@ -285,138 +359,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-      ),
-    );
-  }
-
-  Widget _buildScanOption({
-    required IconData icon,
-    required Color color,
-    required String text,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.green.shade50,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: color),
-            const SizedBox(width: 12),
-            Text(
-              text,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryCard(String title, String subtitle, String imagePath) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(imagePath, fit: BoxFit.cover),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildArticleCard(String title, String subtitle, String imagePath) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
-                imageUrl: imagePath,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    const CircularProgressIndicator(),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right),
-        ],
       ),
     );
   }
@@ -509,6 +451,16 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+
+                    Text(
+                      description.isEmpty
+                          ? "Loading description..."
+                          : description,
+                      style: const TextStyle(fontSize: 16, color: Colors.black),
                     ),
                     SizedBox(
                       height: 40,
