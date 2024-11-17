@@ -60,4 +60,11 @@ The Dataset that we use :
 https://www.kaggle.com/datasets/emmarex/plantdisease?resource=download
 ```
 
+LLM Model
+
+```bash
+Open Ai Model : 
+https://api-inference.huggingface.co/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5
+```
+
 ## Screenshots
