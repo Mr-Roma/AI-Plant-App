@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:ai_plant_app/presentation/pages/detail_page/article_detail.dart';
 import 'package:ai_plant_app/presentation/widgets/homepage/buildArticleCard_widget.dart';
@@ -77,6 +78,11 @@ class _HomePageState extends State<HomePage> {
     print('Recognized label: $label'); // Debug print
 
     if (label != "No result") {
+      setState(() {
+        description = "Loading description...";
+      });
+
+      await waitForModel(); // Wait for the model to be ready
       await fetchDescription(label);
     } else {
       setState(() {
@@ -87,10 +93,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> fetchDescription(String title) async {
     String apiUrl = dotenv.env['API_URL']!;
-    String apiKey = dotenv.env['STORAGE_BUCKET']!;
+    String apiKey = dotenv.env['API_KEY_HUGGINGFACE']!;
 
     try {
-      print('Fetching description for disease: $title'); // Debug print
+      print('Fetching description for disease: $title');
 
       final response = await http
           .post(
@@ -101,32 +107,50 @@ class _HomePageState extends State<HomePage> {
             },
             body: json.encode({
               'inputs':
-                  'Describe the plant disease: $title. Include symptoms, causes, and basic treatment recommendations.',
+                  '''Generate a comprehensive report about the plant disease "$title". 
+
+Your report should include:
+1. **Common Symptoms**: What visible signs appear on the plant?
+2. **Causes**: What factors (e.g., fungi, bacteria, viruses, or environmental conditions) cause this disease?
+3. **Prevention Methods**: What steps can farmers take to prevent this disease?
+4. **Treatment Options**: How can this disease be treated effectively?
+
+Format your response as a detailed and structured plain text explanation.''',
               'parameters': {
-                'max_length': 500,
-                'temperature': 0.7,
+                'max_length': 800,
+                'temperature': 0.6, // Slightly lower for more focused answers
+                'top_k': 50,
               }
             }),
           )
-          .timeout(
-              const Duration(seconds: 15)); // Set a timeout for the request
+          .timeout(const Duration(seconds: 15));
 
-      print('Response status code: ${response.statusCode}'); // Debug print
-      print('Response body: ${response.body}'); // Debug print
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        // Parse the response
-        final List<dynamic> responseData = json.decode(response.body);
-        if (responseData.isNotEmpty &&
-            responseData[0]['generated_text'] != null) {
-          setState(() {
-            description = responseData[0]['generated_text'];
-          });
-        } else {
-          setState(() {
-            description = 'No description available.';
-          });
+        final dynamic responseData = json.decode(response.body);
+        String generatedText = '';
+
+        if (responseData is List && responseData.isNotEmpty) {
+          generatedText = responseData[0]['generated_text'] ?? '';
+        } else if (responseData is Map) {
+          generatedText = responseData['generated_text'] ?? '';
         }
+
+        generatedText = generatedText
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .replaceAll(RegExp(r'\s+'), ' ')
+            .trim();
+
+        setState(() {
+          if (generatedText.isNotEmpty) {
+            description = generatedText;
+          } else {
+            description =
+                "The AI could not provide detailed information. Consider researching \"$title\" manually for more accurate data.";
+          }
+        });
       } else {
         print('API Error: ${response.statusCode} - ${response.body}');
         setState(() {
@@ -138,8 +162,26 @@ class _HomePageState extends State<HomePage> {
       print('Error fetching description: $e');
       setState(() {
         description =
-            "An error occurred while fetching the disease description.";
+            e is TimeoutException ? "Request timed out." : "An error occurred.";
       });
+    }
+  }
+
+// Update the waitForModel function to use the new model
+  Future<void> waitForModel() async {
+    String apiUrl = dotenv.env['API_URL']!;
+    String apiKey = dotenv.env['API_KEY_HUGGINGFACE']!;
+
+    while (true) {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+        },
+      );
+
+      if (response.statusCode != 503) break;
+      await Future.delayed(const Duration(seconds: 20));
     }
   }
 
@@ -459,7 +501,17 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       description.isEmpty
                           ? "Loading description..."
-                          : description,
+                          : "Description: ",
+                      style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      description,
                       style: const TextStyle(fontSize: 16, color: Colors.black),
                     ),
                     SizedBox(
