@@ -4,6 +4,7 @@ import 'package:ai_plant_app/presentation/pages/detail_page/article_detail.dart'
 import 'package:ai_plant_app/presentation/widgets/homepage/buildArticleCard_widget.dart';
 import 'package:ai_plant_app/presentation/widgets/homepage/buildCategory_widget.dart';
 import 'package:ai_plant_app/presentation/widgets/homepage/buildScan_widget.dart';
+import 'package:ai_plant_app/presentation/widgets/homepage/scanresult_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_tflite/flutter_tflite.dart';
@@ -245,7 +246,16 @@ Format your response as a detailed and structured plain text explanation.''',
                     elevation: 1,
                   ),
                   Expanded(
-                    child: _scanResultPage(label, confidence.toString(), ''),
+                    child: Expanded(
+                      child: ScanResultPage(
+                        confidence: confidence,
+                        title: label,
+                        subtitle:
+                            "${confidence.toStringAsFixed(2)}% Confidence",
+                        filePath: filePath,
+                        description: description,
+                      ),
+                    ),
                   ),
                 ],
               )
@@ -401,162 +411,6 @@ Format your response as a detailed and structured plain text explanation.''',
                   ),
                 ],
               ),
-      ),
-    );
-  }
-
-  Widget _scanResultPage(String title, String subtitle, String imagePath) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      child: Card(
-        color: Colors.white,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              Container(
-                height: 250,
-                width: 250,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20)),
-                ),
-                child: filePath == null
-                    ? Image.asset(
-                        'assets/images/upload.png',
-                        fit: BoxFit.cover,
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.file(
-                          filePath!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Success message
-                    Row(
-                      children: const [
-                        Icon(Icons.check_circle, color: Colors.green),
-                        SizedBox(width: 8),
-                        Text(
-                          "Hurray, we identified the disease!",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // Title
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Description
-                    Text(
-                      "Confidence $subtitle",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const Icon(Icons.check_circle, color: Colors.green),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Accuracy is ${confidence.toStringAsFixed(2)}%",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-
-                    Text(
-                      description.isEmpty
-                          ? "Loading description..."
-                          : "Description: ",
-                      style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      description,
-                      style: const TextStyle(fontSize: 16, color: Colors.black),
-                    ),
-                    SizedBox(
-                      height: 40,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Implement save functionality
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.bookmark_border,
-                                  color: Colors.white),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                "Save this plant",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
