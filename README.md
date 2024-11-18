@@ -64,7 +64,7 @@ LLM Model
 
 ```bash
 Open Ai Model : 
-https://api-inference.huggingface.co/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5
+https://api-inference.huggingface.co/models/google/flan-t5-large
 ```
 
 ## Screenshots
