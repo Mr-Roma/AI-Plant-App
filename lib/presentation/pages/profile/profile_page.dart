@@ -1,7 +1,21 @@
+import 'package:ai_plant_app/presentation/auth/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  void singUserOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) =>
+            AuthPage())); // Navigate back to the previous screen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +87,13 @@ class ProfilePage extends StatelessWidget {
                 // Account Settings Section
                 _buildSectionTitle('Account Setting'),
                 _buildSettingItem(
+                  OnTap: () {},
                   icon: Icons.language,
                   title: 'Choose language',
                   color: Colors.green,
                 ),
                 _buildSettingItem(
+                  OnTap: () {},
                   icon: Icons.notifications_none,
                   title: 'Notification',
                   color: Colors.green,
@@ -87,16 +103,19 @@ class ProfilePage extends StatelessWidget {
                 // Other Settings Section
                 _buildSectionTitle('Other Settings'),
                 _buildSettingItem(
+                  OnTap: () {},
                   icon: Icons.headset_mic_outlined,
                   title: 'Call center',
                   color: Colors.green,
                 ),
                 _buildSettingItem(
+                  OnTap: () {},
                   icon: Icons.description_outlined,
                   title: 'Terms & Conditions',
                   color: Colors.green,
                 ),
                 _buildSettingItem(
+                  OnTap: () {},
                   icon: Icons.star_outline,
                   title: 'Rated',
                   color: Colors.green,
@@ -106,12 +125,50 @@ class ProfilePage extends StatelessWidget {
                 // Logout Section
                 _buildSectionTitle('LogOut'),
                 _buildSettingItem(
+                  OnTap: () {},
                   icon: Icons.delete_outline,
                   title: 'Delete Account',
                   color: Colors.red,
                   titleColor: Colors.red,
                 ),
                 _buildSettingItem(
+                  OnTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(
+                            "Alert!",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red),
+                          ),
+                          content: Text(
+                            "Confirm to LogOut?",
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                singUserOut(context);
+                              },
+                              child: Text(
+                                "OK",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   icon: Icons.logout,
                   title: 'Logout',
                   color: Colors.red,
@@ -142,48 +199,52 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSettingItem({
+    required VoidCallback OnTap,
     required IconData icon,
     required String title,
     required Color color,
     Color? titleColor,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
+    return GestureDetector(
+      onTap: OnTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        title: Text(
-          title,
-          style: TextStyle(
-              color: titleColor ?? Colors.black87,
-              fontWeight: FontWeight.w500,
-              fontSize: 14),
-        ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: Colors.grey,
+        child: ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 20,
+            ),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+                color: titleColor ?? Colors.black87,
+                fontWeight: FontWeight.w500,
+                fontSize: 14),
+          ),
+          trailing: const Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: Colors.grey,
+          ),
         ),
       ),
     );

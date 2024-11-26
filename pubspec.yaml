@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.2.1
+  flutter_localization: ^0.2.2
   flutter_tflite: ^1.0.1
   google_generative_ai: ^0.4.6
   http: ^1.2.2
