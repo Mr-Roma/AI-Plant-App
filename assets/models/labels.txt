@@ -1,10 +1,8 @@
+No Disease Found
 Orange haunglongbing
 Grape leaf blight
-Grape healthy
 Grape black rot
-Corn healthy
 Corn common rust
 Corn cercospora leaf
-Apple healthy
 Apple black rot
 Apple scab

@@ -63,14 +63,25 @@ class ScanResultPage extends StatelessWidget {
                   children: [
                     // Success message
                     Row(
-                      children: const [
-                        Icon(Icons.check_circle, color: Colors.green),
-                        SizedBox(width: 8),
+                      children: [
+                        Icon(
+                          title == "No Disease Found"
+                              ? Icons.error
+                              : Icons.check_circle,
+                          color: title == "No Disease Found"
+                              ? Colors.red
+                              : Colors.green,
+                        ),
+                        const SizedBox(width: 8),
                         Text(
-                          "Hurray, we identified the disease!",
+                          title == "No Disease Found"
+                              ? "Sorry, we could not identify the disease!"
+                              : "Hurray, we identified the disease!",
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.green,
+                            color: title == "No Disease Found"
+                                ? Colors.red
+                                : Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -97,13 +108,22 @@ class ScanResultPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     Row(
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green),
+                        Icon(
+                          title == "No Disease Found"
+                              ? Icons.error
+                              : Icons.check_circle,
+                          color: title == "No Disease Found"
+                              ? Colors.red
+                              : Colors.green,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           "Accuracy is ${confidence.toStringAsFixed(2)}%",
-                          style: const TextStyle(
+                          style: TextStyle(
+                            color: title == "No Disease Found"
+                                ? Colors.red
+                                : Colors.green,
                             fontSize: 16,
-                            color: Colors.green,
                           ),
                         ),
                       ],

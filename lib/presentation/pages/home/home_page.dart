@@ -26,6 +26,12 @@ class _HomePageState extends State<HomePage> {
   double confidence = 0.0;
   bool showScanResult = false;
   String description = "";
+  Map<String, int> plantDiseaseCounts = {
+    'Apple': 0,
+    'Grape': 0,
+    'Corn': 0,
+    'Orange': 0,
+  };
 
   @override
   void initState() {
@@ -65,12 +71,23 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       filePath = imageFile;
       description = "Loading description..."; // Set loading state
+
       if (recognition != null && recognition.isNotEmpty) {
         confidence = (recognition[0]['confidence'] * 100);
         label = (recognition[0]['label'].toString());
+
+        // Check if confidence is below the threshold
+        if (confidence < 75) {
+          label = "No Disease Found";
+          confidence = 0.0;
+        } else {
+          updatePlantDiseaseCount(label);
+        }
+
         showScanResult = true;
       } else {
-        label = "No result";
+        // Handle case when no results are returned
+        label = "No Disease Found";
         confidence = 0.0;
         showScanResult = true;
       }
@@ -78,7 +95,7 @@ class _HomePageState extends State<HomePage> {
 
     print('Recognized label: $label'); // Debug print
 
-    if (label != "No result") {
+    if (label != "No Disease Found") {
       setState(() {
         description = "Loading description...";
       });
@@ -87,6 +104,7 @@ class _HomePageState extends State<HomePage> {
       await fetchDescription(label);
     } else {
       setState(() {
+        confidence = 0.0;
         description = "Could not identify the disease.";
       });
     }
@@ -215,6 +233,18 @@ Format your response as a detailed and structured plain text explanation.''',
     }
   }
 
+  void updatePlantDiseaseCount(String diseaseLabel) {
+    if (diseaseLabel.contains("Apple")) {
+      plantDiseaseCounts['Apple'] = (plantDiseaseCounts['Apple'] ?? 0) + 1;
+    } else if (diseaseLabel.contains("Grape")) {
+      plantDiseaseCounts['Grape'] = (plantDiseaseCounts['Grape'] ?? 0) + 1;
+    } else if (diseaseLabel.contains("Corn")) {
+      plantDiseaseCounts['Corn'] = (plantDiseaseCounts['Corn'] ?? 0) + 1;
+    } else if (diseaseLabel.contains("Orange")) {
+      plantDiseaseCounts['Orange'] = (plantDiseaseCounts['Orange'] ?? 0) + 1;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -331,13 +361,21 @@ Format your response as a detailed and structured plain text explanation.''',
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
                             children: [
-                              buildCategoryCard('Apple', '2 Plants',
+                              buildCategoryCard(
+                                  'Apple',
+                                  '${plantDiseaseCounts['Apple']} Plants',
                                   'assets/images/apple_home.png'),
-                              buildCategoryCard('Grape', '1 Plant',
+                              buildCategoryCard(
+                                  'Grape',
+                                  '${plantDiseaseCounts['Grape']} Plants',
                                   'assets/images/grape_home.png'),
-                              buildCategoryCard('Corn', '2 Plants',
+                              buildCategoryCard(
+                                  'Corn',
+                                  '${plantDiseaseCounts['Corn']} Plants',
                                   'assets/images/corn_home.png'),
-                              buildCategoryCard('Orange', '5 Plants',
+                              buildCategoryCard(
+                                  'Orange',
+                                  '${plantDiseaseCounts['Orange']} Plants',
                                   'assets/images/orange_home.png'),
                             ],
                           ),
